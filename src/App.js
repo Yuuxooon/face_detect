@@ -5,7 +5,7 @@ import Rank from './Components/Rank/Rank'
 import FaceRecognition from './Components/FaceRecognition/FaceRecognition'
 import ParticlesDisplay from './Components/ParticleDisplay/ParticleDisplay'
 import SignIn from './Components/SignIn/SignIn'
-import Register from './Components/Rank/Rank'
+import Register from './Components/Register/Register'
 
 import React from 'react'
 import { Component } from 'react'
@@ -15,7 +15,13 @@ import './App.css'
 class App extends Component {
   constructor () {
     super()
-    this.state = { input: '', imageURL: '', box: {}, route: 'signin' }
+    this.state = {
+      input: '',
+      imageURL: '',
+      box: {},
+      route: 'signin',
+      isSignedIn: false
+    }
   }
 
   calculateFaceLocation = data => {
@@ -41,6 +47,15 @@ class App extends Component {
 
   onInputChange = event => {
     this.setState({ input: event.target.value })
+  }
+
+  onRouteChange = route => {
+    if (route === 'signout') {
+      this.setState({ isSignedIn: false })
+    } else if (route === 'home') {
+      this.setState({ isSignedIn: true })
+    }
+    this.setState({ route: route })
   }
 
   getRequestOptions = () => {
@@ -102,20 +117,18 @@ class App extends Component {
     // -------------------------------------------------------------------------------------------------------------------------
   }
 
-  onRouteChange = route => {
-    this.setState({ route: route })
-  }
-
   // -------------------------------------------------------------------------------------------------------------------------
   // The rendering happens here
   render () {
+    const { imageURL, isSignedIn, route, box } = this.state
     return (
       <div className='App'>
         <ParticlesDisplay />
-        <Navigation onRouteChange={this.onRouteChange} />
-        {this.state.route === 'signin' ? (
-          <SignIn onRouteChange={this.onRouteChange} />
-        ) : (
+        <Navigation
+          onRouteChange={this.onRouteChange}
+          isSignedIn={isSignedIn}
+        />
+        {route === 'home' ? (
           <div>
             <Logo />
             <Rank />
@@ -123,11 +136,12 @@ class App extends Component {
               onInputChange={this.onInputChange}
               onButtonSubmit={this.onButtonSubmit}
             />
-            <FaceRecognition
-              box={this.state.box}
-              imageURL={this.state.imageURL}
-            />
+            <FaceRecognition box={box} imageURL={imageURL} />
           </div>
+        ) : route === 'signin' ? (
+          <SignIn onRouteChange={this.onRouteChange} />
+        ) : (
+          <Register onRouteChange={this.onRouteChange} />
         )}
       </div>
     )
