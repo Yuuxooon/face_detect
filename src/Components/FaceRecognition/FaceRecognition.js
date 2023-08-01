@@ -2,7 +2,7 @@ import React from 'react'
 import './FaceRecognition.css'
 
 const FaceRecognition = ({ imageURL, box }) => {
-  return (
+  return imageURL !== '' ? (
     <div className='center'>
       <div className='absolute mt2'>
         <img
@@ -23,6 +23,8 @@ const FaceRecognition = ({ imageURL, box }) => {
         ></div>
       </div>
     </div>
+  ) : (
+    <div></div>
   )
 }
 
