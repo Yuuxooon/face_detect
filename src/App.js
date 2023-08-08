@@ -3,7 +3,7 @@ import Logo from './Components/Logo/Logo'
 import ImageLinkForm from './Components/ImageLinkForm/ImageLinkForm'
 import Rank from './Components/Rank/Rank'
 import FaceRecognition from './Components/FaceRecognition/FaceRecognition'
-import ParticlesDisplay from './Components/ParticleDisplay/ParticleDisplay'
+// import ParticlesDisplay from './Components/ParticleDisplay/ParticleDisplay'
 import SignIn from './Components/SignIn/SignIn'
 import Register from './Components/Register/Register'
 
@@ -50,10 +50,15 @@ class App extends Component {
   calculateFaceLocation = data => {
     const clarifaiFace =
       data.outputs[0].data.regions[0].region_info.bounding_box
-    const image = document.getElementById('inputImage')
+    const image = document.querySelector('#inputImage') // for whatever reason this fails to get the object when the image is first rendered
+    console.log(document.querySelector('#inputImage'), this.state.imageURL)
+    // some debugging here
+    console.log('There should be some data, an image to be exact: ', image)
+    console.log('Some numbers', image.height, image.width)
+    // ------------------------
     const width = Number(image.width)
     const height = Number(image.height)
-    console.log(width, height)
+    console.log(width, height) // those should be numbers
 
     return {
       leftCol: clarifaiFace.left_col * width,
@@ -94,56 +99,13 @@ class App extends Component {
     this.setState({ route: route })
   }
 
-  getRequestOptions = () => {
-    // fetch the URL from the text field
-    this.setState({ imageURL: this.state.input })
-    // Your PAT (Personal Access Token) can be found in the portal under Authentification
-    const PAT = '5ee7cac460a2473f8c6a1eae5a802af3'
-    // Specify the correct user_id/app_id pairings
-    // Since you're making inferences outside your app's scope
-    const USER_ID = 'yuuxoon'
-    const APP_ID = 'FaceDetect'
-    // const MODEL_VERSION_ID = 'aa7f35c01e0642fda5cf400f543e7c40'
-    const IMAGE_URL = this.state.input
-    // -------------------------------------------------------------------------------------------------------------------------
-
-    const raw = JSON.stringify({
-      user_app_id: {
-        user_id: USER_ID,
-        app_id: APP_ID
-      },
-      inputs: [
-        {
-          data: {
-            image: {
-              url: IMAGE_URL
-            }
-          }
-        }
-      ]
-    })
-
-    return {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Key ' + PAT
-      },
-      body: raw
-    }
-  }
-
   onButtonSubmit = event => {
-    // Change these to whatever model and image URL you want to use
-    const MODEL_ID = 'face-detection'
-    // NOTE: MODEL_VERSION_ID is optional, you can also call prediction with the MODEL_ID only
-    // https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
-    // this will default to the latest version_id
-
-    fetch(
-      'https://api.clarifai.com/v2/models/' + MODEL_ID + '/outputs',
-      this.getRequestOptions()
-    )
+    Object.assign(this.state, { imageURL: this.state.input })
+    fetch('http://localhost:3000/image', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageURL: this.state.imageURL })
+    })
       .then(response => response.json())
       .then(result => {
         if (result) {
